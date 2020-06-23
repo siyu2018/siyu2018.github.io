@@ -67,7 +67,7 @@
 <meta property="og:image" content="http://siyu2018.github.io/images/pasted-7.png">
 <meta property="og:image" content="http://siyu2018.github.io/images/pasted-8.png">
 <meta property="og:image" content="http://siyu2018.github.io/images/pasted-9.png">
-<meta property="og:updated_time" content="2020-06-23T07:50:31.789Z">
+<meta property="og:updated_time" content="2020-06-23T07:53:44.181Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="hexo图片问题解决">
 <meta name="twitter:description" content="Hexo图片不加载问题的解决方案">
@@ -226,7 +226,7 @@
                 
               
 
-              <time title="创建时间：2020-06-23 15:12:14 / 修改时间：15:50:31" itemprop="dateCreated datePublished" datetime="2020-06-23T15:12:14+08:00">2020-06-23</time>
+              <time title="创建时间：2020-06-23 15:12:14 / 修改时间：15:53:44" itemprop="dateCreated datePublished" datetime="2020-06-23T15:12:14+08:00">2020-06-23</time>
             </span>
           
             
@@ -266,7 +266,7 @@
 
 <p>然后再yml的同级目录新建<code>hexo-publish.bat</code>文件，文件内容为</p>
 <p><code>hexo g -d</code></p>
-<p>重新启动hexo，就可以点击Deploy，直接发布了</p>
+<p>重新启动hexo，就可以点击Deploy直接发布了</p>
 <h3 id="hexo-admin图片功能修复"><a href="#hexo-admin图片功能修复" class="headerlink" title="hexo-admin图片功能修复"></a>hexo-admin图片功能修复</h3><p>当需要使用图片时，可直接复制图片，粘贴在文本框</p>
 <p><img src="/images/pasted-6.png" alt="upload successful"></p>
 <p>发现会出现这种情况，而preview也没有正常显示，可以把路径手动修改成<code>(/images/pasted-1.png)</code>,这样图片就可以正常显示了，不过每次都要修改路径过于麻烦，要让他自动变成正常的样子，需要改动js代码</p>
@@ -274,7 +274,7 @@
 <p><img src="/images/pasted-8.png" alt="upload successful"></p>
 <p>修改代码之后，我们可以看到，生成的已经是正确的图片路径了，但是图片还是加载失败了，我发现是因为图片刚上传上前去，hexo还没来得及让图片链接生效，重新刷新一下界面就可以显示了。<br>但是不能让我们插入一张图片就刷新一次，我们可以让图片上传后暂停一分钟再显示，所以要修改第二处代码。</p>
 <p><img src="/images/pasted-9.png" alt="upload successful"></p>
-<p>修改这个代码的93行,将函数体换位下面的语句</p>
+<p>修改这个代码的93行,将函数体换成下面的语句</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">   uploadImage: <span class="function"><span class="keyword">function</span>(<span class="params">data, filename</span>)  </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> imgJson=post(<span class="string">'/images/upload'</span>, &#123;<span class="attr">data</span>: data, <span class="attr">filename</span>: filename&#125;);</span><br><span class="line">	<span class="keyword">var</span> start = (<span class="keyword">new</span> <span class="built_in">Date</span>()).getTime();</span><br><span class="line">	<span class="keyword">while</span>((<span class="keyword">new</span> <span class="built_in">Date</span>()).getTime() - start &lt; <span class="number">1000</span>) &#123;</span><br><span class="line">		<span class="keyword">continue</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> imgJson;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>到这里，hexo-admin的图片功能就正常了</p>
