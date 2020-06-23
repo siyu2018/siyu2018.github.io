@@ -55,14 +55,19 @@
 </script>
 
   <meta property="og:type" content="article">
-<meta property="og:title" content="Tensorflow多gpu 数据并行">
-<meta property="og:url" content="http://yoursite.com/2019/08/22/multi-gpu-tensorflow/index.html">
+<meta property="og:title" content="计算机浮点数原理">
+<meta property="og:url" content="http://yoursite.com/2020/06/23/计算机浮点数原理/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-22T12:40:57.467Z">
+<meta property="og:image" content="c:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622152501165.png">
+<meta property="og:image" content="c:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622153351084.png">
+<meta property="og:image" content="c:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622153559467.png">
+<meta property="og:image" content="c:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622160322749.png">
+<meta property="og:updated_time" content="2020-06-23T02:29:15.325Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Tensorflow多gpu 数据并行">
-  <link rel="canonical" href="http://yoursite.com/2019/08/22/multi-gpu-tensorflow/">
+<meta name="twitter:title" content="计算机浮点数原理">
+<meta name="twitter:image" content="c:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622152501165.png">
+  <link rel="canonical" href="http://yoursite.com/2020/06/23/计算机浮点数原理/">
 
 
 <script id="page-configurations">
@@ -76,7 +81,7 @@
   };
 </script>
 
-  <title>Tensorflow多gpu 数据并行 | Hexo</title>
+  <title>计算机浮点数原理 | Hexo</title>
   <meta name="generator" content="Hexo 3.9.0">
   
 
@@ -188,7 +193,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/22/multi-gpu-tensorflow/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/23/计算机浮点数原理/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Siyu">
@@ -200,7 +205,7 @@
       <meta itemprop="name" content="Hexo">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">Tensorflow多gpu 数据并行
+        <h1 class="post-title" itemprop="name headline">计算机浮点数原理
 
           
         </h1>
@@ -216,7 +221,7 @@
                 
               
 
-              <time title="创建时间：2019-08-22 17:02:23 / 修改时间：20:40:57" itemprop="dateCreated datePublished" datetime="2019-08-22T17:02:23+08:00">2019-08-22</time>
+              <time title="创建时间：2020-06-23 10:26:14 / 修改时间：10:29:15" itemprop="dateCreated datePublished" datetime="2020-06-23T10:26:14+08:00">2020-06-23</time>
             </span>
           
             
@@ -235,19 +240,28 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="Tensorflow多gpu-数据并行"><a href="#Tensorflow多gpu-数据并行" class="headerlink" title="Tensorflow多gpu 数据并行"></a><a id="more"></a>Tensorflow多gpu 数据并行</h3><p>为了加快训练速度，尝试使用数据并行同步模式，使用两块显卡做了尝试，最终成功运行</p>
-<p>依然使用placeholder方法读取数据，不过在get_batch时要获取batch size*gpu_num的数据量</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">img_train, gt_train = self.train_dataset.get_batch(self.data_path, self.batch_size*<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
-
-<p>之后定义学习率及优化方法</p>
-<p>核心代码</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.variable_scope(tf.get_variable_scope()):</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">2</span>):</span><br><span class="line">        <span class="keyword">with</span> tf.device(<span class="string">'/gpu:%d'</span> % i):</span><br><span class="line">            <span class="keyword">with</span> tf.name_scope(<span class="string">'tower_%d'</span> % i):</span><br><span class="line">                _images=images[i*self.batch_size:(i+<span class="number">1</span>)*self.batch_size]</span><br><span class="line">                _labels=labels[i*self.batch_size:(i+<span class="number">1</span>)*self.batch_size]</span><br><span class="line">                    logits = DLinkNetPlus(_images, self.num_class, dblock_type=<span class="string">'DBlockPlus'</span>, layer=self.layer, scope=<span class="string">'DLinkNetPlus'</span>)</span><br><span class="line">                tf.get_variable_scope().reuse_variables()</span><br><span class="line">                predict = tf.cast(tf.argmax(logits, axis=<span class="number">3</span>), tf.float32, name=<span class="string">'prediction'</span>)</span><br><span class="line">                jaccard_loss = dice_coe(tf.expand_dims(predict, axis=<span class="number">-1</span>), _labels)</span><br><span class="line">                seg_loss_softmax = tf.reduce_mean(</span><br><span class="line">                    tf.losses.sparse_softmax_cross_entropy(labels=tf.cast(_labels, tf.int32), logits=logits))</span><br><span class="line">                total_loss = seg_loss_softmax - self.lamda * tf.log(jaccard_loss)</span><br><span class="line"></span><br><span class="line">                grads=optimizer.compute_gradients(total_loss)</span><br><span class="line">                tower_grads.append(grads)</span><br><span class="line">grads=self.average_gradients(tower_grads)</span><br><span class="line"></span><br><span class="line">train_op = optimizer.apply_gradients(grads,global_step=train_step)</span><br></pre></td></tr></table></figure>
-
-<p>这里range（）里应为gpu数量，必须要在variable——scope范围内，才可以使用tf.get_variable_scope().reuse_variables(),并且，<strong>在定义模型时，在使用命名空间时要使用tf.variable_scope()而不是tf.name_scope()</strong>，因为在多gpu训练时，需要复用参数，计算平均梯度后再更新，因此第二块显卡需要用get_variable()获取参数，因此需要搭配variable_scope()使用，并且在最顶层的variable_scope设置reuse=tf.AUTO_REUSE</p>
-<p>average——gradients函数定义如下</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">average_gradients</span><span class="params">(self,tower_grads)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    梯度平均</span></span><br><span class="line"><span class="string">    :param tower_grads: 所有tower的梯度</span></span><br><span class="line"><span class="string">    :return: 每一个变量的平均梯度</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    average_grads = []</span><br><span class="line">    <span class="comment"># 枚举所有的变量 计算变量在所有GPU下梯度的平均值</span></span><br><span class="line">    <span class="keyword">for</span> grad_and_vars <span class="keyword">in</span> zip(*tower_grads):</span><br><span class="line">        grads = []</span><br><span class="line">        <span class="keyword">for</span> g, _ <span class="keyword">in</span> grad_and_vars:</span><br><span class="line">            print(g)</span><br><span class="line">            expanded_g = tf.expand_dims(g, <span class="number">0</span>)</span><br><span class="line">            grads.append(expanded_g)</span><br><span class="line"></span><br><span class="line">        grad = tf.concat(axis=<span class="number">0</span>, values=grads)</span><br><span class="line">        grad = tf.reduce_mean(grad, <span class="number">0</span>)</span><br><span class="line">        v = grad_and_vars[<span class="number">0</span>][<span class="number">1</span>]</span><br><span class="line">        grad_and_var = (grad, v)</span><br><span class="line">        average_grads.append(grad_and_var)</span><br><span class="line">    <span class="keyword">return</span> average_grads</span><br></pre></td></tr></table></figure>
-
-<p>参考资料：《tensorflow实战goole深度学习框架》第十章</p>
+        <h1 id="计算机浮点数原理"><a href="#计算机浮点数原理" class="headerlink" title="计算机浮点数原理"></a><a id="more"></a>计算机浮点数原理</h1><h2 id="组成方式"><a href="#组成方式" class="headerlink" title="组成方式"></a>组成方式</h2><p><img src="C:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622152501165.png" alt="image-20200622152501165"></p>
+<p>float 为32位，double 为64位，组成方式如上图所示</p>
+<p><img src="C:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622153351084.png" alt="image-20200622153351084"></p>
+<p>值的计算由上式决定</p>
+<p>其中M和E的取值规则分下图几种情况</p>
+<p><img src="C:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622153559467.png" alt="image-20200622153559467"></p>
+<ol>
+<li><h3 id="规范化的"><a href="#规范化的" class="headerlink" title="规范化的"></a>规范化的</h3><h4 id="阶数E"><a href="#阶数E" class="headerlink" title="阶数E"></a>阶数E</h4><p>以float为例，float含8位数字表示阶数E，若用无符号数e表示这8位，则e的范围为1-254，E的取值规则为e-127，即E的取值范围为-126<del>127。若是double，则含11位，E=e-1023,范围为-1022</del>1023</p>
+<h4 id="尾数M"><a href="#尾数M" class="headerlink" title="尾数M"></a>尾数M</h4><p>f区域包含多位，代表二进制小数，0&lt;=f&lt;1 ,M=1+f</p>
+</li>
+<li><h3 id="非规范化的"><a href="#非规范化的" class="headerlink" title="非规范化的"></a>非规范化的</h3><p>非规范化的浮点数用于表示非常接近0的数字，以提升精度，但会损失性能</p>
+<h4 id="阶数E-1"><a href="#阶数E-1" class="headerlink" title="阶数E"></a>阶数E</h4><p>float中E=-126，double 中 E=-1022</p>
+<h4 id="尾数M-1"><a href="#尾数M-1" class="headerlink" title="尾数M"></a>尾数M</h4><p>M=f，不再加一</p>
+<p><img src="C:%5CUsers%5Csiyu%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20200622160322749.png" alt="image-20200622160322749"></p>
+</li>
+<li><h3 id="特殊值"><a href="#特殊值" class="headerlink" title="特殊值"></a>特殊值</h3><p>正负0 除符号位以外全为0</p>
+<p>正负无穷 阶数全1，尾数全0</p>
+<p>NaN 阶数全1，尾数非0</p>
+</li>
+</ol>
+<h2 id="舍入"><a href="#舍入" class="headerlink" title="舍入"></a>舍入</h2><p>采用向偶数舍入的规则，1为奇数，0为偶素，当结尾为X.XXXX100时，才会采用此规则，否则向更接近的一边舍入。向偶数舍入是减小多次运算的累积误差</p>
+<h2 id="运算"><a href="#运算" class="headerlink" title="运算"></a>运算</h2><p>浮点数运算可交换，不可结合</p>
 
     </div>
 
@@ -264,8 +278,8 @@
           <div class="post-nav">
             <div class="post-nav-next post-nav-item">
               
-                <a href="/2019/08/22/tf_scope/" rel="next" title="tf.name_scope()与tf.variable_scope()辨析">
-                  <i class="fa fa-chevron-left"></i> tf.name_scope()与tf.variable_scope()辨析
+                <a href="/2019/08/22/multi-gpu-tensorflow/" rel="next" title="Tensorflow多gpu 数据并行">
+                  <i class="fa fa-chevron-left"></i> Tensorflow多gpu 数据并行
                 </a>
               
             </div>
@@ -273,10 +287,6 @@
             <span class="post-nav-divider"></span>
 
             <div class="post-nav-prev post-nav-item">
-              
-                <a href="/2020/06/23/计算机浮点数原理/" rel="prev" title="计算机浮点数原理">
-                  计算机浮点数原理 <i class="fa fa-chevron-right"></i>
-                </a>
               
             </div>
           </div>
@@ -326,7 +336,7 @@
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
           <div class="post-toc">
-            <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Tensorflow多gpu-数据并行"><span class="nav-number">1.</span> <span class="nav-text">Tensorflow多gpu 数据并行</span></a></li></ol></div>
+            <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#计算机浮点数原理"><span class="nav-number">1.</span> <span class="nav-text">计算机浮点数原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#组成方式"><span class="nav-number">1.1.</span> <span class="nav-text">组成方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#规范化的"><span class="nav-number">1.1.1.</span> <span class="nav-text">规范化的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#阶数E"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">阶数E</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#尾数M"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">尾数M</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非规范化的"><span class="nav-number">1.1.2.</span> <span class="nav-text">非规范化的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#阶数E-1"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">阶数E</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#尾数M-1"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">尾数M</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特殊值"><span class="nav-number">1.1.3.</span> <span class="nav-text">特殊值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#舍入"><span class="nav-number">1.2.</span> <span class="nav-text">舍入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运算"><span class="nav-number">1.3.</span> <span class="nav-text">运算</span></a></li></ol></li></ol></div>
           </div>
         
       </div>
